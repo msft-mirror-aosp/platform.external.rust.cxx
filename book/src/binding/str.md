@@ -30,7 +30,6 @@ public:
   const char *data() const noexcept;
   size_t size() const noexcept;
   size_t length() const noexcept;
-  bool empty() const noexcept;
 
   using iterator = const char *;
   using const_iterator = const char *;
