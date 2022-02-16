@@ -87,11 +87,12 @@ pub(crate) fn report(error: impl StdError) -> impl Display {
 
     impl<E: StdError> Display for Report<E> {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-            write!(formatter, "{}", self.0)?;
+            Display::fmt(&self.0, formatter)?;
             let mut error: &dyn StdError = &self.0;
 
             while let Some(cause) = error.source() {
-                write!(formatter, "\n\nCaused by:\n    {}", cause)?;
+                formatter.write_str("\n\nCaused by:\n    ")?;
+                Display::fmt(cause, formatter)?;
                 error = cause;
             }
 
