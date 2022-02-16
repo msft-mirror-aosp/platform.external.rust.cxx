@@ -151,7 +151,6 @@ fn struct_default(strct: &Struct, span: Span) -> TokenStream {
     let fields = strct.fields.iter().map(|field| &field.name.rust);
 
     quote_spanned! {span=>
-        #[allow(clippy::derivable_impls)] // different spans than the derived impl
         impl #generics ::std::default::Default for #ident #generics {
             fn default() -> Self {
                 #ident {
