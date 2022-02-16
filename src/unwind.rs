@@ -1,5 +1,3 @@
-#![allow(missing_docs)]
-
 use std::io::{self, Write};
 use std::panic::{self, AssertUnwindSafe};
 use std::process;

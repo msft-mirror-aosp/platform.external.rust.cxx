@@ -150,7 +150,7 @@ fn insert(set: &mut DiscriminantSet, discriminant: Discriminant) -> Result<Discr
 }
 
 impl Discriminant {
-    pub const fn zero() -> Self {
+    const fn zero() -> Self {
         Discriminant {
             sign: Sign::Positive,
             magnitude: 0,
@@ -179,28 +179,6 @@ impl Discriminant {
             magnitude: i.wrapping_abs() as u64,
         }
     }
-
-    pub const fn checked_succ(self) -> Option<Self> {
-        match self.sign {
-            Sign::Negative => {
-                if self.magnitude == 1 {
-                    Some(Discriminant::zero())
-                } else {
-                    Some(Discriminant {
-                        sign: Sign::Negative,
-                        magnitude: self.magnitude - 1,
-                    })
-                }
-            }
-            Sign::Positive => match self.magnitude.checked_add(1) {
-                Some(magnitude) => Some(Discriminant {
-                    sign: Sign::Positive,
-                    magnitude,
-                }),
-                None => None,
-            },
-        }
-    }
 }
 
 impl Display for Discriminant {
@@ -208,7 +186,7 @@ impl Display for Discriminant {
         if self.sign == Sign::Negative {
             f.write_str("-")?;
         }
-        write!(f, "{}", self.magnitude)
+        Display::fmt(&self.magnitude, f)
     }
 }
 
