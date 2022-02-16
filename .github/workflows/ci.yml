@@ -54,7 +54,6 @@ jobs:
   buck:
     name: Buck
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@stable
@@ -81,7 +80,6 @@ jobs:
   bazel:
     name: Bazel
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v2
       - name: Install Bazel
