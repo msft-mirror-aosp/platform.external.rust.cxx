@@ -1,18 +1,14 @@
-#![allow(missing_docs)]
-
 use alloc::string::String;
-use core::mem::{self, MaybeUninit};
-use core::ptr;
+use core::mem;
 
-// ABI compatible with C++ rust::String (not necessarily alloc::string::String).
 #[repr(C)]
 pub struct RustString {
-    repr: [MaybeUninit<usize>; mem::size_of::<String>() / mem::size_of::<usize>()],
+    repr: String,
 }
 
 impl RustString {
     pub fn from(s: String) -> Self {
-        unsafe { mem::transmute::<String, RustString>(s) }
+        RustString { repr: s }
     }
 
     pub fn from_ref(s: &String) -> &Self {
@@ -24,24 +20,17 @@ impl RustString {
     }
 
     pub fn into_string(self) -> String {
-        unsafe { mem::transmute::<RustString, String>(self) }
+        self.repr
     }
 
     pub fn as_string(&self) -> &String {
-        unsafe { &*(self as *const RustString as *const String) }
+        &self.repr
     }
 
     pub fn as_mut_string(&mut self) -> &mut String {
-        unsafe { &mut *(self as *mut RustString as *mut String) }
+        &mut self.repr
     }
 }
 
-impl Drop for RustString {
-    fn drop(&mut self) {
-        unsafe { ptr::drop_in_place(self.as_mut_string()) }
-    }
-}
-
-const_assert_eq!(mem::size_of::<[usize; 3]>(), mem::size_of::<RustString>());
-const_assert_eq!(mem::size_of::<String>(), mem::size_of::<RustString>());
-const_assert_eq!(mem::align_of::<String>(), mem::align_of::<RustString>());
+const_assert_eq!(mem::size_of::<[usize; 3]>(), mem::size_of::<String>());
+const_assert_eq!(mem::align_of::<usize>(), mem::align_of::<String>());
