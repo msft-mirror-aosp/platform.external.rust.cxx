@@ -1,18 +1,17 @@
 load(
-    "//tools/bazel:third_party.bzl",
-    cargo_build_script = "third_party_cargo_build_script",
+    "//tools/bazel:rust.bzl",
     glob = "third_party_glob",
     rust_library = "third_party_rust_library",
 )
 
 rust_library(
     name = "bitflags",
-    srcs = glob(["vendor/bitflags-1.3.2/src/**"]),
+    srcs = glob(["vendor/bitflags-1.2.1/src/**"]),
 )
 
 rust_library(
     name = "cc",
-    srcs = glob(["vendor/cc-1.0.69/src/**"]),
+    srcs = glob(["vendor/cc-1.0.67/src/**"]),
     visibility = ["//visibility:public"],
 )
 
@@ -46,26 +45,18 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.28/src/**"]),
+    srcs = glob(["vendor/proc-macro2-1.0.26/src/**"]),
     crate_features = [
         "proc-macro",
         "span-locations",
+    ],
+    rustc_flags = [
+        "--cfg=span_locations",
+        "--cfg=use_proc_macro",
+        "--cfg=wrap_proc_macro",
     ],
     visibility = ["//visibility:public"],
-    deps = [
-        ":proc-macro2@build",
-        ":unicode-xid",
-    ],
-)
-
-cargo_build_script(
-    name = "proc-macro2@build",
-    srcs = ["vendor/proc-macro2-1.0.28/build.rs"],
-    crate_features = [
-        "proc-macro",
-        "span-locations",
-    ],
-    crate_name = "build",
+    deps = [":unicode-xid"],
 )
 
 rust_library(
@@ -85,7 +76,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.75/src/**"]),
+    srcs = glob(["vendor/syn-1.0.68/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
@@ -98,23 +89,8 @@ rust_library(
     deps = [
         ":proc-macro2",
         ":quote",
-        ":syn@build",
         ":unicode-xid",
     ],
-)
-
-cargo_build_script(
-    name = "syn@build",
-    srcs = ["vendor/syn-1.0.75/build.rs"],
-    crate_features = [
-        "clone-impls",
-        "derive",
-        "full",
-        "parsing",
-        "printing",
-        "proc-macro",
-    ],
-    crate_name = "build",
 )
 
 rust_library(
@@ -135,5 +111,5 @@ rust_library(
 
 rust_library(
     name = "unicode-xid",
-    srcs = glob(["vendor/unicode-xid-0.2.2/src/**"]),
+    srcs = glob(["vendor/unicode-xid-0.2.1/src/**"]),
 )

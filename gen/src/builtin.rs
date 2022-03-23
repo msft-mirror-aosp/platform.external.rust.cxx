@@ -30,7 +30,6 @@ pub struct Builtins<'a> {
     pub relocatable: bool,
     pub friend_impl: bool,
     pub is_complete: bool,
-    pub destroy: bool,
     pub deleter_if: bool,
     pub content: Content<'a>,
 }
@@ -333,14 +332,6 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "    return error;");
         writeln!(out, "  }}");
         writeln!(out, "}};");
-    }
-
-    if builtin.destroy {
-        out.next_section();
-        writeln!(out, "template <typename T>");
-        writeln!(out, "void destroy(T *ptr) {{");
-        writeln!(out, "  ptr->~T();");
-        writeln!(out, "}}");
     }
 
     if builtin.deleter_if {
