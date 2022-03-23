@@ -21,7 +21,6 @@ pub static ERRORS: &[Error] = &[
     DISCRIMINANT_OVERFLOW,
     DOT_INCLUDE,
     DOUBLE_UNDERSCORE,
-    RESERVED_LIFETIME,
     RUST_TYPE_BY_VALUE,
     UNSUPPORTED_TYPE,
     USE_NOT_ALLOWED,
@@ -67,12 +66,6 @@ pub static DOUBLE_UNDERSCORE: Error = Error {
     msg: "identifiers containing double underscore are reserved in C++",
     label: Some("reserved identifier"),
     note: Some("identifiers containing double underscore are reserved in C++"),
-};
-
-pub static RESERVED_LIFETIME: Error = Error {
-    msg: "invalid lifetime parameter name: `'static`",
-    label: Some("'static is a reserved lifetime name"),
-    note: None,
 };
 
 pub static RUST_TYPE_BY_VALUE: Error = Error {
