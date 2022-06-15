@@ -6,24 +6,20 @@ use core::str;
 
 #[export_name = "cxxbridge1$str$new"]
 unsafe extern "C" fn str_new(this: &mut MaybeUninit<&str>) {
-    let this = this.as_mut_ptr();
-    unsafe { ptr::write(this, "") }
+    ptr::write(this.as_mut_ptr(), "");
 }
 
 #[export_name = "cxxbridge1$str$ref"]
 unsafe extern "C" fn str_ref<'a>(this: &mut MaybeUninit<&'a str>, string: &'a String) {
-    let this = this.as_mut_ptr();
-    let s = string.as_str();
-    unsafe { ptr::write(this, s) }
+    ptr::write(this.as_mut_ptr(), string.as_str());
 }
 
 #[export_name = "cxxbridge1$str$from"]
 unsafe extern "C" fn str_from(this: &mut MaybeUninit<&str>, ptr: *const u8, len: usize) -> bool {
-    let slice = unsafe { slice::from_raw_parts(ptr, len) };
+    let slice = slice::from_raw_parts(ptr, len);
     match str::from_utf8(slice) {
         Ok(s) => {
-            let this = this.as_mut_ptr();
-            unsafe { ptr::write(this, s) }
+            ptr::write(this.as_mut_ptr(), s);
             true
         }
         Err(_) => false,

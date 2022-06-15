@@ -1,5 +1,5 @@
 use alloc::boxed::Box;
-use core::fmt::{self, Display};
+use core::fmt::{self, Debug, Display};
 
 /// Exception thrown from an `extern "C++"` function.
 #[derive(Debug)]
@@ -16,7 +16,6 @@ impl Display for Exception {
 impl std::error::Error for Exception {}
 
 impl Exception {
-    #[allow(missing_docs)]
     pub fn what(&self) -> &str {
         &self.what
     }
