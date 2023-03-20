@@ -20,23 +20,6 @@ rust_binary_host {
     rustlibs: [
         "libclap",
         "libcodespan_reporting",
-        "libcxxbridge_cmd",
-        "libproc_macro2",
-        "libquote",
-        "libsyn",
-    ],
-    compile_multilib: "first",
-}
-
-rust_library_host {
-    name: "libcxxbridge_cmd",
-    crate_name: "cxxbridge_cmd",
-    cargo_env_compat: true,
-    srcs: ["src/lib.rs"],
-    edition: "2018",
-    rustlibs: [
-        "libclap",
-        "libcodespan_reporting",
         "libproc_macro2",
         "libquote",
         "libsyn",
