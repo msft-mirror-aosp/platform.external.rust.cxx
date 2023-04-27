@@ -58,10 +58,8 @@ rust_library {
     vendor_available: true,
     product_available: true,
     apex_available: [
+        "//apex_available:anyapex",
         "//apex_available:platform",
-        "com.android.btservices",
-        "com.android.compos",
-        "com.android.virt",
     ],
     min_sdk_version: "29",
 }
@@ -75,10 +73,8 @@ cc_library_static {
     vendor_available: true,
     product_available: true,
     apex_available: [
+        "//apex_available:anyapex",
         "//apex_available:platform",
-        "com.android.btservices",
-        "com.android.compos",
-        "com.android.virt",
     ],
     min_sdk_version: "29",
 }
@@ -87,7 +83,10 @@ cc_library_static {
     host_supported: true,
     name: "libcxx-demo-blobstore",
     srcs: ["demo/src/blobstore.cc"],
-    generated_headers: ["cxx-demo-bridge-header", "cxx-bridge-header"],
+    generated_headers: [
+        "cxx-demo-bridge-header",
+        "cxx-bridge-header",
+    ],
     generated_sources: ["cxx-demo-bridge-code"],
 }
 
