@@ -1,0 +1,17 @@
+rust_library_host {
+    name: "libcxx_gen",
+    crate_name: "cxx_gen",
+    cargo_env_compat: true,
+    cargo_pkg_version: "0.7.93",
+    srcs: ["src/lib.rs"],
+    edition: "2018",
+    rustlibs: [
+        "libcodespan_reporting",
+        "libproc_macro2",
+        "libquote",
+        "libsyn",
+    ],
+    compile_multilib: "first",
+    product_available: true,
+    vendor_available: true,
+}
