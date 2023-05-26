@@ -88,7 +88,7 @@ fn check_type_ident(cx: &mut Check, name: &NamedType) {
         && !cx.types.rust.contains(ident)
     {
         let msg = format!("unsupported type: {}", ident);
-        cx.error(ident, &msg);
+        cx.error(ident, msg);
     }
 }
 
@@ -664,14 +664,14 @@ fn is_opaque_cxx(cx: &mut Check, ty: &Ident) -> bool {
 fn span_for_struct_error(strct: &Struct) -> TokenStream {
     let struct_token = strct.struct_token;
     let mut brace_token = Group::new(Delimiter::Brace, TokenStream::new());
-    brace_token.set_span(strct.brace_token.span);
+    brace_token.set_span(strct.brace_token.span.join());
     quote!(#struct_token #brace_token)
 }
 
 fn span_for_enum_error(enm: &Enum) -> TokenStream {
     let enum_token = enm.enum_token;
     let mut brace_token = Group::new(Delimiter::Brace, TokenStream::new());
-    brace_token.set_span(enm.brace_token.span);
+    brace_token.set_span(enm.brace_token.span.join());
     quote!(#enum_token #brace_token)
 }
 
