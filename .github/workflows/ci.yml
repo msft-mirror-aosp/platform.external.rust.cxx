@@ -3,14 +3,20 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
   schedule: [cron: "40 1 * * *"]
 
 permissions:
   contents: read
 
 jobs:
+  pre_ci:
+    uses: dtolnay/.github/.github/workflows/pre_ci.yml@master
+
   test:
     name: ${{matrix.name || format('Rust {0}', matrix.rust)}}
+    needs: pre_ci
+    if: needs.pre_ci.outputs.continue
     runs-on: ${{matrix.os || 'ubuntu'}}-latest
     strategy:
       fail-fast: false
@@ -20,6 +26,7 @@ jobs:
           - rust: beta
           - rust: stable
           - rust: 1.60.0
+          - rust: 1.64.0
           - name: macOS
             rust: nightly
             os: macos
@@ -48,7 +55,7 @@ jobs:
         # builds.
         run: |
           echo RUSTFLAGS=$RUSTFLAGS >> $GITHUB_ENV
-          echo exclude=--exclude cxx-test-suite >> $GITHUB_OUTPUT
+          echo exclude=--exclude cxx-test-suite ${{matrix.rust == '1.60.0' && '--exclude cxxbridge-cmd' || ''}} >> $GITHUB_OUTPUT
         env:
           RUSTFLAGS: ${{env.RUSTFLAGS}} ${{matrix.os && github.event_name != 'schedule' && '--cfg skip_ui_tests' || ''}}
         id: testsuite
@@ -78,13 +85,13 @@ jobs:
         run: sudo apt-get install lld
       - run: cargo vendor --versioned-dirs --locked
         working-directory: third-party
-      - run: reindeer vendor
+      - run: reindeer buckify
         working-directory: third-party
       - name: Check reindeer-generated BUCK file up to date
         run: git diff --exit-code
       - run: buck2 run demo
       - run: buck2 build ...
-      - run: buck2 run tests:test
+      - run: buck2 test ...
 
   bazel:
     name: Bazel
@@ -95,7 +102,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install Bazel
         run: |
-          wget -q -O install.sh https://github.com/bazelbuild/bazel/releases/download/5.1.1/bazel-5.1.1-installer-linux-x86_64.sh
+          wget -q -O install.sh https://github.com/bazelbuild/bazel/releases/download/6.0.0/bazel-6.0.0-installer-linux-x86_64.sh
           chmod +x install.sh
           ./install.sh --user
           echo $HOME/bin >> $GITHUB_PATH
