@@ -1,4 +1,5 @@
 #include "../include/cxx.h"
+#include <cstdio>
 #include <cstring>
 #include <iostream>
 #include <memory>
@@ -76,8 +77,8 @@ inline namespace cxxbridge1 {
 template <typename Exception>
 void panic [[noreturn]] (const char *msg) {
 #if defined(RUST_CXX_NO_EXCEPTIONS)
-  std::cerr << "Error: " << msg << ". Aborting." << std::endl;
-  std::terminate();
+  std::fprintf(stderr, "Error: %s. Aborting.\n", msg);
+  std::abort();
 #else
   throw Exception(msg);
 #endif
@@ -285,7 +286,7 @@ String::String(unsafe_bitcopy_t, const String &bits) noexcept
     : repr(bits.repr) {}
 
 std::ostream &operator<<(std::ostream &os, const String &s) {
-  os.write(s.data(), s.size());
+  os.write(s.data(), static_cast<std::streamsize>(s.size()));
   return os;
 }
 
@@ -374,7 +375,7 @@ void Str::swap(Str &rhs) noexcept {
 }
 
 std::ostream &operator<<(std::ostream &os, const Str &s) {
-  os.write(s.data(), s.size());
+  os.write(s.data(), static_cast<std::streamsize>(s.size()));
   return os;
 }
 
@@ -592,6 +593,9 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
 } // namespace
 
 #define STD_VECTOR_OPS(RUST_TYPE, CXX_TYPE)                                    \
+  std::vector<CXX_TYPE> *cxxbridge1$std$vector$##RUST_TYPE##$new() noexcept {  \
+    return new std::vector<CXX_TYPE>();                                        \
+  }                                                                            \
   std::size_t cxxbridge1$std$vector$##RUST_TYPE##$size(                        \
       const std::vector<CXX_TYPE> &s) noexcept {                               \
     return s.size();                                                           \

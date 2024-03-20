@@ -1,10 +1,13 @@
+#![forbid(unsafe_op_in_unsafe_fn)]
 #![allow(
     clippy::boxed_local,
     clippy::derive_partial_eq_without_eq,
     clippy::just_underscores_and_digits,
+    clippy::missing_errors_doc,
     clippy::missing_safety_doc,
     clippy::must_use_candidate,
     clippy::needless_lifetimes,
+    clippy::needless_pass_by_ref_mut,
     clippy::needless_pass_by_value,
     clippy::ptr_arg,
     clippy::trivially_copy_pass_by_ref,
@@ -405,7 +408,7 @@ impl R {
     }
 }
 
-pub struct Reference<'a>(&'a String);
+pub struct Reference<'a>(pub &'a String);
 
 impl ffi::Shared {
     fn r_method_on_shared(&self) -> String {

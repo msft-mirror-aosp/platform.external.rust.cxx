@@ -22,12 +22,12 @@ use syn::{
     TypeReference, Variant as RustVariant, Visibility,
 };
 
-pub mod kw {
+pub(crate) mod kw {
     syn::custom_keyword!(Pin);
     syn::custom_keyword!(Result);
 }
 
-pub fn parse_items(
+pub(crate) fn parse_items(
     cx: &mut Errors,
     items: Vec<Item>,
     trusted: bool,
@@ -42,7 +42,7 @@ pub fn parse_items(
             },
             Item::Enum(item) => apis.push(parse_enum(cx, item, namespace)),
             Item::ForeignMod(foreign_mod) => {
-                parse_foreign_mod(cx, foreign_mod, &mut apis, trusted, namespace)
+                parse_foreign_mod(cx, foreign_mod, &mut apis, trusted, namespace);
             }
             Item::Impl(item) => match parse_impl(cx, item) {
                 Ok(imp) => apis.push(imp),
