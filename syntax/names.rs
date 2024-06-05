@@ -3,16 +3,17 @@ use crate::syntax::{Lifetimes, NamedType, Pair, Symbol};
 use proc_macro2::{Ident, Span};
 use std::fmt::{self, Display};
 use std::iter;
-use syn::parse::{Error, Result};
+use syn::ext::IdentExt;
+use syn::parse::{Error, Parser, Result};
 use syn::punctuated::Punctuated;
 
 #[derive(Clone)]
-pub struct ForeignName {
+pub(crate) struct ForeignName {
     text: String,
 }
 
 impl Pair {
-    pub fn to_symbol(&self) -> Symbol {
+    pub(crate) fn to_symbol(&self) -> Symbol {
         let segments = self
             .namespace
             .iter()
@@ -23,7 +24,7 @@ impl Pair {
 }
 
 impl NamedType {
-    pub fn new(rust: Ident) -> Self {
+    pub(crate) fn new(rust: Ident) -> Self {
         let generics = Lifetimes {
             lt_token: None,
             lifetimes: Punctuated::new(),
@@ -31,17 +32,13 @@ impl NamedType {
         };
         NamedType { rust, generics }
     }
-
-    pub fn span(&self) -> Span {
-        self.rust.span()
-    }
 }
 
 impl ForeignName {
-    pub fn parse(text: &str, span: Span) -> Result<Self> {
+    pub(crate) fn parse(text: &str, span: Span) -> Result<Self> {
         // TODO: support C++ names containing whitespace (`unsigned int`) or
         // non-alphanumeric characters (`operator++`).
-        match syn::parse_str::<Ident>(text) {
+        match Ident::parse_any.parse_str(text) {
             Ok(ident) => {
                 let text = ident.to_string();
                 Ok(ForeignName { text })
