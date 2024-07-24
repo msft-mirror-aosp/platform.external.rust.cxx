@@ -38,7 +38,7 @@ rust_library {
     name: "libcxx",
     crate_name: "cxx",
     srcs: ["src/lib.rs"],
-    edition: "2018",
+    edition: "2021",
     features: [
         "alloc",
         "std",
