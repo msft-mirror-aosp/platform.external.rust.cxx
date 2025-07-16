@@ -25,7 +25,7 @@ mod c_char_definition {
         ),
         all(
             target_os = "android",
-            any(target_arch = "aarch64", target_arch = "arm")
+            any(target_arch = "aarch64", target_arch = "arm", target_arch = "riscv64")
         ),
         all(target_os = "l4re", target_arch = "x86_64"),
         all(
