@@ -130,6 +130,13 @@ String::String(const char *s, std::size_t len) {
              len);
 }
 
+#ifdef __cpp_char8_t
+String::String(const char8_t *s) : String(reinterpret_cast<const char *>(s)) {}
+
+String::String(const char8_t *s, std::size_t len)
+    : String(reinterpret_cast<const char *>(s), len) {}
+#endif
+
 String::String(const char16_t *s) {
   assert(s != nullptr);
   assert(is_aligned<char16_t>(s));
@@ -186,7 +193,7 @@ String String::lossy(const char16_t *s, std::size_t len) noexcept {
   return String(lossy_t{}, s, len);
 }
 
-String &String::operator=(const String &other) &noexcept {
+String &String::operator=(const String &other) & noexcept {
   if (this != &other) {
     cxxbridge1$string$drop(this);
     cxxbridge1$string$clone(this, other);
@@ -194,7 +201,7 @@ String &String::operator=(const String &other) &noexcept {
   return *this;
 }
 
-String &String::operator=(String &&other) &noexcept {
+String &String::operator=(String &&other) & noexcept {
   cxxbridge1$string$drop(this);
   this->repr = other.repr;
   cxxbridge1$string$new(&other);
@@ -317,6 +324,12 @@ Str::Str(const char *s, std::size_t len) {
 Str::operator std::string() const {
   return std::string(this->data(), this->size());
 }
+
+#if __cplusplus >= 201703L
+Str::operator std::string_view() const {
+  return std::string_view(this->data(), this->size());
+}
+#endif
 
 const char *Str::data() const noexcept { return cxxbridge1$str$ptr(this); }
 
@@ -487,7 +500,7 @@ Error &Error::operator=(const Error &other) & {
   return *this;
 }
 
-Error &Error::operator=(Error &&other) &noexcept {
+Error &Error::operator=(Error &&other) & noexcept {
   std::exception::operator=(std::move(other));
   delete[] this->msg;
   this->msg = other.msg;
@@ -532,6 +545,11 @@ using isize_if_unique =
     typename std::conditional<std::is_same<rust::isize, int64_t>::value ||
                                   std::is_same<rust::isize, int32_t>::value,
                               struct isize_ignore, rust::isize>::type;
+// Similarly, on some platforms char may just be an alias for [u]int8_t.
+using char_if_unique =
+    typename std::conditional<std::is_same<char, uint8_t>::value ||
+                                  std::is_same<char, int8_t>::value,
+                              struct char_ignore, char>::type;
 
 class Fail final {
   repr::PtrLen &throw$;
@@ -770,7 +788,7 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
 #define FOR_EACH_RUST_VEC(MACRO)                                               \
   FOR_EACH_NUMERIC(MACRO)                                                      \
   MACRO(bool, bool)                                                            \
-  MACRO(char, char)                                                            \
+  MACRO(char, rust::detail::char_if_unique)                                    \
   MACRO(usize, rust::detail::usize_if_unique)                                  \
   MACRO(isize, rust::detail::isize_if_unique)                                  \
   MACRO(string, rust::String)                                                  \

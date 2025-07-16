@@ -33,8 +33,10 @@ pub(crate) struct Includes<'a> {
     pub iterator: bool,
     pub memory: bool,
     pub new: bool,
+    pub ranges: bool,
     pub stdexcept: bool,
     pub string: bool,
+    pub string_view: bool,
     pub type_traits: bool,
     pub utility: bool,
     pub vector: bool,
@@ -94,8 +96,10 @@ pub(super) fn write(out: &mut OutFile) {
         iterator,
         memory,
         new,
+        ranges,
         stdexcept,
         string,
+        string_view,
         type_traits,
         utility,
         vector,
@@ -172,6 +176,16 @@ pub(super) fn write(out: &mut OutFile) {
     if (basetsd || sys_types) && !cxx_header {
         writeln!(out, "#endif");
     }
+    if string_view && !cxx_header {
+        writeln!(out, "#if __cplusplus >= 201703L");
+        writeln!(out, "#include <string_view>");
+        writeln!(out, "#endif");
+    }
+    if ranges && !cxx_header {
+        writeln!(out, "#if __cplusplus >= 202002L");
+        writeln!(out, "#include <ranges>");
+        writeln!(out, "#endif");
+    }
 }
 
 impl<'i, 'a> Extend<&'i Include> for Includes<'a> {
@@ -180,7 +194,7 @@ impl<'i, 'a> Extend<&'i Include> for Includes<'a> {
     }
 }
 
-impl<'i> From<&'i syntax::Include> for Include {
+impl From<&syntax::Include> for Include {
     fn from(include: &syntax::Include) -> Self {
         Include {
             path: include.path.clone(),

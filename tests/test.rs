@@ -1,20 +1,19 @@
 #![allow(
     clippy::assertions_on_constants,
-    clippy::assertions_on_result_states,
     clippy::cast_possible_truncation,
     clippy::cast_possible_wrap,
     clippy::float_cmp,
     clippy::needless_pass_by_value,
-    clippy::needless_pass_by_ref_mut,
-    clippy::unit_cmp,
-    clippy::unseparated_literal_suffix
+    clippy::ptr_cast_constness,
+    clippy::unit_cmp
 )]
 
-use cxx::SharedPtr;
+use cxx::{SharedPtr, UniquePtr};
 use cxx_test_suite::module::ffi2;
 use cxx_test_suite::{cast, ffi, R};
 use std::cell::Cell;
 use std::ffi::CStr;
+use std::panic::{self, RefUnwindSafe, UnwindSafe};
 
 thread_local! {
     static CORRECT: Cell<bool> = const { Cell::new(false) };
@@ -55,6 +54,7 @@ fn test_c_return() {
     assert_eq!("2020", ffi::c_return_rust_string());
     assert_eq!("Hello \u{fffd}World", ffi::c_return_rust_string_lossy());
     assert_eq!("2020", ffi::c_return_unique_ptr_string().to_str().unwrap());
+    assert_eq!(c"2020", ffi::c_return_unique_ptr_string().as_c_str());
     assert_eq!(4, ffi::c_return_unique_ptr_vector_u8().len());
     assert_eq!(
         200_u8,
@@ -257,6 +257,8 @@ fn test_c_method_calls() {
     assert_eq!(2021, unique_ptr.get());
     assert_eq!(2021, unique_ptr.get2());
     assert_eq!(2021, *unique_ptr.getRef());
+    assert_eq!(2021, unsafe { &mut *unique_ptr.as_mut_ptr() }.get());
+    assert_eq!(2021, unsafe { &*unique_ptr.as_ptr() }.get());
     assert_eq!(2021, *unique_ptr.pin_mut().getMut());
     assert_eq!(2022, unique_ptr.pin_mut().set_succeed(2022).unwrap());
     assert!(unique_ptr.pin_mut().get_fail().is_err());
@@ -378,4 +380,18 @@ fn test_raw_ptr() {
     let c3 = ffi::c_return_const_ptr(2025);
     assert_eq!(2025, unsafe { ffi::c_take_const_ptr(c3) });
     assert_eq!(2025, unsafe { ffi::c_take_mut_ptr(c3 as *mut ffi::C) }); // deletes c3
+}
+
+#[test]
+#[allow(clippy::items_after_statements, clippy::no_effect_underscore_binding)]
+fn test_unwind_safe() {
+    fn inspect(_c: &ffi::C) {}
+    let _unwind_safe = |c: UniquePtr<ffi::C>| panic::catch_unwind(|| drop(c));
+    let _ref_unwind_safe = |c: &ffi::C| panic::catch_unwind(|| inspect(c));
+
+    fn require_unwind_safe<T: UnwindSafe>() {}
+    require_unwind_safe::<ffi::C>();
+
+    fn require_ref_unwind_safe<T: RefUnwindSafe>() {}
+    require_ref_unwind_safe::<ffi::C>();
 }

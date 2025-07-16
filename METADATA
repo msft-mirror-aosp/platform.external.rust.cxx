@@ -1,19 +1,20 @@
+# This project was upgraded with external_updater.
+# Usage: tools/external_updater/updater.sh update external/rust/cxx
+# For more info, check https://cs.android.com/android/platform/superproject/main/+/main:tools/external_updater/README.md
+
 name: "cxx"
 description: "Safe interop between Rust and C++"
 third_party {
-  url {
-    type: HOMEPAGE
-    value: "https://github.com/dtolnay/cxx"
-  }
-  url {
-    type: GIT
-    value: "https://github.com/dtolnay/cxx.git"
-  }
-  version: "07a056908617acbdad914acda674b6da88ed1add"
   license_type: NOTICE
   last_upgrade_date {
-    year: 2024
-    month: 3
-    day: 19
+    year: 2025
+    month: 7
+    day: 16
+  }
+  homepage: "https://github.com/dtolnay/cxx"
+  identifier {
+    type: "Git"
+    value: "https://github.com/dtolnay/cxx.git"
+    version: "1.0.160"
   }
 }
