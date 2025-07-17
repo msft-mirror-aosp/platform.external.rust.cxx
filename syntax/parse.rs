@@ -353,7 +353,7 @@ fn parse_foreign_mod(
                 cx.error(span, "extern \"Rust\" block does not need to be unsafe");
             }
         }
-        Lang::Cxx => {}
+        Lang::Cxx | Lang::CxxUnwind => {}
     }
 
     let trusted = trusted || foreign_mod.unsafety.is_some();
@@ -436,18 +436,16 @@ fn parse_foreign_mod(
 }
 
 fn parse_lang(abi: &Abi) -> Result<Lang> {
-    let name = match &abi.name {
-        Some(name) => name,
-        None => {
-            return Err(Error::new_spanned(
-                abi,
-                "ABI name is required, extern \"C++\" or extern \"Rust\"",
-            ));
-        }
+    let Some(name) = &abi.name else {
+        return Err(Error::new_spanned(
+            abi,
+            "ABI name is required, extern \"C++\" or extern \"Rust\"",
+        ));
     };
 
     match name.value().as_str() {
         "C++" => Ok(Lang::Cxx),
+        "C++-unwind" => Ok(Lang::CxxUnwind),
         "Rust" => Ok(Lang::Rust),
         _ => Err(Error::new_spanned(
             abi,
@@ -495,7 +493,7 @@ fn parse_extern_type(
     let semi_token = foreign_type.semi_token;
 
     (match lang {
-        Lang::Cxx => Api::CxxType,
+        Lang::Cxx | Lang::CxxUnwind => Api::CxxType,
         Lang::Rust => Api::RustType,
     })(ExternType {
         cfg,
@@ -674,7 +672,7 @@ fn parse_extern_fn(
     let semi_token = foreign_fn.semi_token;
 
     Ok(match lang {
-        Lang::Cxx => Api::CxxFunction,
+        Lang::Cxx | Lang::CxxUnwind => Api::CxxFunction,
         Lang::Rust => Api::RustFunction,
     }(ExternFn {
         cfg,
@@ -967,7 +965,7 @@ fn parse_extern_type_bounded(
     let name = pair(namespace, &ident, cxx_name, rust_name);
 
     Ok(match lang {
-        Lang::Cxx => Api::CxxType,
+        Lang::Cxx | Lang::CxxUnwind => Api::CxxType,
         Lang::Rust => Api::RustType,
     }(ExternType {
         cfg,
@@ -1323,22 +1321,25 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
         }
     }
 
+    if ty.qself.is_none() && path.segments.len() == 2 && path.segments[0].ident == "cxx" {
+        return Err(Error::new_spanned(
+            ty,
+            "unexpected `cxx::` qualifier found in a `#[cxx::bridge]`",
+        ));
+    }
+
     Err(Error::new_spanned(ty, "unsupported type"))
 }
 
 fn parse_type_array(ty: &TypeArray) -> Result<Type> {
     let inner = parse_type(&ty.elem)?;
 
-    let len_expr = if let Expr::Lit(lit) = &ty.len {
-        lit
-    } else {
+    let Expr::Lit(len_expr) = &ty.len else {
         let msg = "unsupported expression, array length must be an integer literal";
         return Err(Error::new_spanned(&ty.len, msg));
     };
 
-    let len_token = if let Lit::Int(int) = &len_expr.lit {
-        int.clone()
-    } else {
+    let Lit::Int(len_token) = &len_expr.lit else {
         let msg = "array length must be an integer literal";
         return Err(Error::new_spanned(len_expr, msg));
     };
@@ -1357,7 +1358,7 @@ fn parse_type_array(ty: &TypeArray) -> Result<Type> {
         inner,
         semi_token,
         len,
-        len_token,
+        len_token: len_token.clone(),
     })))
 }
 

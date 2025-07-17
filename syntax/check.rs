@@ -383,7 +383,7 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
         }
         let lang = match ety.lang {
             Lang::Rust => "Rust",
-            Lang::Cxx => "C++",
+            Lang::Cxx | Lang::CxxUnwind => "C++",
         };
         let msg = format!(
             "derive({}) on opaque {} type is not supported yet",
@@ -409,7 +409,7 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
 
 fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
     match efn.lang {
-        Lang::Cxx => {
+        Lang::Cxx | Lang::CxxUnwind => {
             if !efn.generics.params.is_empty() && !efn.trusted {
                 let ref span = span_for_generics_error(efn);
                 cx.error(span, "extern C++ function with lifetimes must be declared in `unsafe extern \"C++\"` block");
@@ -427,7 +427,7 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
         }
     }
 
-    check_generics(cx, &efn.sig.generics);
+    check_generics(cx, &efn.generics);
 
     if let Some(receiver) = &efn.receiver {
         let ref span = span_for_receiver_error(receiver);
@@ -472,7 +472,7 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
                 );
             }
         } else if let Type::Ptr(_) = arg.ty {
-            if efn.sig.unsafety.is_none() {
+            if efn.unsafety.is_none() {
                 cx.error(
                     arg,
                     "pointer argument requires that the function be marked unsafe",
@@ -540,7 +540,7 @@ fn check_api_impl(cx: &mut Check, imp: &Impl) {
 }
 
 fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {
-    if efn.sig.unsafety.is_some() {
+    if efn.unsafety.is_some() {
         // Unrestricted as long as the function is made unsafe-to-call.
         return;
     }
@@ -555,9 +555,8 @@ fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {
         if receiver.mutable {
             return;
         }
-        let resolve = match cx.types.try_resolve(&receiver.ty) {
-            Some(resolve) => resolve,
-            None => return,
+        let Some(resolve) = cx.types.try_resolve(&receiver.ty) else {
+            return;
         };
         if !resolve.generics.lifetimes.is_empty() {
             return;

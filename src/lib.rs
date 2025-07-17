@@ -18,7 +18,7 @@
 //!
 //! <br>
 //!
-//! *Compiler support: requires rustc 1.60+ and c++11 or newer*<br>
+//! *Compiler support: requires rustc 1.73+ and c++11 or newer*<br>
 //! *[Release notes](https://github.com/dtolnay/cxx/releases)*
 //!
 //! <br>
@@ -251,7 +251,7 @@
 //! fn main() {
 //!     cxx_build::bridge("src/main.rs")  // returns a cc::Build
 //!         .file("src/demo.cc")
-//!         .flag_if_supported("-std=c++11")
+//!         .std("c++11")
 //!         .compile("cxxbridge-demo");
 //!
 //!     println!("cargo:rerun-if-changed=src/main.rs");
@@ -364,8 +364,8 @@
 //! </table>
 
 #![no_std]
-#![doc(html_root_url = "https://docs.rs/cxx/1.0.119")]
-#![cfg_attr(doc_cfg, feature(doc_cfg))]
+#![doc(html_root_url = "https://docs.rs/cxx/1.0.160")]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![deny(
     improper_ctypes,
     improper_ctypes_definitions,
@@ -380,30 +380,22 @@
 #![allow(non_camel_case_types)]
 #![allow(
     clippy::cast_possible_truncation,
-    clippy::cognitive_complexity,
-    clippy::declare_interior_mutable_const,
     clippy::doc_markdown,
-    clippy::empty_enum,
-    clippy::extra_unused_type_parameters,
-    clippy::inherent_to_string,
+    clippy::elidable_lifetime_names,
     clippy::items_after_statements,
-    clippy::large_enum_variant,
     clippy::len_without_is_empty,
     clippy::missing_errors_doc,
     clippy::missing_safety_doc,
-    clippy::module_inception,
-    clippy::module_name_repetitions,
     clippy::must_use_candidate,
     clippy::needless_doctest_main,
+    clippy::needless_lifetimes,
     clippy::new_without_default,
-    clippy::or_fun_call,
-    clippy::ptr_arg,
     clippy::ptr_as_ptr,
-    clippy::toplevel_ref_arg,
-    clippy::transmute_undefined_repr, // clippy bug: https://github.com/rust-lang/rust-clippy/issues/8417
-    clippy::uninlined_format_args,
-    clippy::useless_let_if_seq,
+    clippy::ptr_cast_constness,
+    clippy::ref_as_ptr,
+    clippy::uninlined_format_args
 )]
+#![allow(unknown_lints, mismatched_lifetime_syntaxes)]
 
 #[cfg(built_with_cargo)]
 extern crate link_cplusplus;
@@ -447,7 +439,6 @@ compile_error! {
 #[macro_use]
 mod macros;
 
-mod c_char;
 mod cxx_vector;
 mod exception;
 mod extern_type;
@@ -464,7 +455,6 @@ mod rust_string;
 mod rust_type;
 mod rust_vec;
 mod shared_ptr;
-mod sip;
 #[path = "cxx_string.rs"]
 mod string;
 mod symbols;
@@ -476,7 +466,7 @@ mod weak_ptr;
 
 pub use crate::cxx_vector::CxxVector;
 #[cfg(feature = "alloc")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "alloc")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 pub use crate::exception::Exception;
 pub use crate::extern_type::{kind, ExternType};
 pub use crate::shared_ptr::SharedPtr;
@@ -502,7 +492,6 @@ pub type Vector<T> = CxxVector<T>;
 // Not public API.
 #[doc(hidden)]
 pub mod private {
-    pub use crate::c_char::c_char;
     pub use crate::cxx_vector::VectorElement;
     pub use crate::extern_type::{verify_extern_kind, verify_extern_type};
     pub use crate::function::FatFunction;

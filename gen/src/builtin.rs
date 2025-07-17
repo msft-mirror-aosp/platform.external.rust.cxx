@@ -60,6 +60,7 @@ pub(super) fn write(out: &mut OutFile) {
         include.array = true;
         include.cstdint = true;
         include.string = true;
+        include.string_view = true;
         builtin.friend_impl = true;
     }
 
@@ -86,6 +87,7 @@ pub(super) fn write(out: &mut OutFile) {
         include.cstddef = true;
         include.cstdint = true;
         include.iterator = true;
+        include.ranges = true;
         include.stdexcept = true;
         include.type_traits = true;
         builtin.friend_impl = true;

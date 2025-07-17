@@ -16,6 +16,7 @@ rust_library_host {
         "libproc_macro2",
         "libquote",
         "libsyn",
+        "libindexmap",
     ],
     compile_multilib: "first",
 }

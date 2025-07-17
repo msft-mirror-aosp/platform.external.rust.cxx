@@ -24,7 +24,9 @@ rust_proc_macro {
         "libproc_macro2",
         "libquote",
         "libsyn",
+        "libindexmap",
     ],
+    proc_macros: ["librustversion"],
     product_available: true,
     vendor_available: true,
 }

@@ -22,9 +22,12 @@ public:
   Str(const char *);
   Str(const char *, size_t);
 
-  Str &operator=(const Str &) noexcept;
+  Str &operator=(const Str &) & noexcept;
 
   explicit operator std::string() const;
+#if __cplusplus >= 201703L
+  explicit operator std::string_view() const;
+#endif
 
   // Note: no null terminator.
   const char *data() const noexcept;

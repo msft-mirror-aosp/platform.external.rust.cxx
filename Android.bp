@@ -46,6 +46,7 @@ rust_library {
     rustlibs: [
         "libanyhow",
         "libthiserror",
+        "libfoldhash",
     ],
     proc_macros: [
         "libcxxbridge_macro",

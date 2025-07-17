@@ -13,6 +13,7 @@ rust_library(
     deps = [
         ":core",
         ":cxxbridge-macro",
+        "//third-party:foldhash",
     ],
 )
 
@@ -32,6 +33,7 @@ rust_binary(
     deps = [
         "//third-party:clap",
         "//third-party:codespan-reporting",
+        "//third-party:indexmap",
         "//third-party:proc-macro2",
         "//third-party:quote",
         "//third-party:syn",
@@ -56,8 +58,10 @@ rust_library(
     edition = "2021",
     proc_macro = True,
     deps = [
+        "//third-party:indexmap",
         "//third-party:proc-macro2",
         "//third-party:quote",
+        "//third-party:rustversion",
         "//third-party:syn",
     ],
 )
@@ -73,7 +77,7 @@ rust_library(
     deps = [
         "//third-party:cc",
         "//third-party:codespan-reporting",
-        "//third-party:once_cell",
+        "//third-party:indexmap",
         "//third-party:proc-macro2",
         "//third-party:quote",
         "//third-party:scratch",
@@ -92,6 +96,7 @@ rust_library(
     deps = [
         "//third-party:cc",
         "//third-party:codespan-reporting",
+        "//third-party:indexmap",
         "//third-party:proc-macro2",
         "//third-party:quote",
         "//third-party:syn",
